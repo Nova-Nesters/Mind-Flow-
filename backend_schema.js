@@ -341,6 +341,302 @@ const HealthScoreSchema = new mongoose.Schema({
   },
 
 });
+// ── 4. GOAL-BASED MEASUREMENT (GBM) SCHEMAS ──────────────────
+/**
+ * Goal-Based Measurement implementation following GQM paradigm.
+ * Goals → Questions → Metrics hierarchy for personalized mental health tracking.
+ */
+
+// ── 4.1 GOAL SCHEMA ───────────────────────────────────────────
+/**
+ * Formalized measurement goal following GQ(I)M structure:
+ * - Object: What to measure (e.g., "My anxiety levels")
+ * - Purpose: Why measure (e.g., "to reduce", "to understand")
+ * - Perspective: Who cares (e.g., "myself", "therapist")
+ * - Environment: Context (e.g., "during exams", "daily life")
+ */
+const GoalSchema = new mongoose.Schema({
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+
+  // GQ(I)M Components
+  object: {
+    type: String,
+    required: true,
+    _scale: 'Nominal',
+    _measurement: 'Direct',
+    _note: 'What entity to measure (e.g., "my mood", "anxiety episodes")',
+  },
+
+  purpose: {
+    type: String,
+    required: true,
+    enum: ['understand', 'predict', 'control', 'improve', 'reduce'],
+    _scale: 'Nominal',
+    _measurement: 'Direct',
+    _note: 'Reason for measurement',
+  },
+
+  perspective: {
+    type: String,
+    required: true,
+    enum: ['myself', 'therapist', 'family', 'school'],
+    _scale: 'Nominal',
+    _measurement: 'Direct',
+    _note: 'Who is interested in the results',
+  },
+
+  environment: {
+    type: String,
+    required: true,
+    _scale: 'Nominal',
+    _measurement: 'Direct',
+    _note: 'Context and constraints (e.g., "during semester", "work stress")',
+  },
+
+  // Goal classification
+  type: {
+    type: String,
+    enum: ['active', 'passive'],
+    required: true,
+    _scale: 'Nominal',
+    _measurement: 'Direct',
+    _note: 'Active: control/change processes; Passive: learn/understand',
+  },
+
+  title: {
+    type: String,
+    required: true,
+    maxlength: 200,
+    _scale: 'Nominal',
+  },
+
+  description: {
+    type: String,
+    maxlength: 1000,
+    _scale: 'Nominal',
+  },
+
+  isActive: {
+    type: Boolean,
+    default: true,
+    _scale: 'Nominal (binary)',
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    _scale: 'Ratio',
+  },
+
+}, { timestamps: true });
+
+
+// ── 4.2 QUESTION SCHEMA ───────────────────────────────────────
+/**
+ * Questions derived from goals in GQM hierarchy.
+ * Each question determines if a goal is being met.
+ */
+const QuestionSchema = new mongoose.Schema({
+  goalId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Goal',
+    required: true,
+  },
+
+  question: {
+    type: String,
+    required: true,
+    maxlength: 500,
+    _scale: 'Nominal',
+    _measurement: 'Direct',
+    _note: 'Question to determine goal achievement (e.g., "What is my average mood this week?")',
+  },
+
+  category: {
+    type: String,
+    enum: ['people', 'process', 'product', 'resource', 'quality'],
+    required: true,
+    _scale: 'Nominal',
+    _measurement: 'Direct',
+    _note: 'GQM category grouping',
+  },
+
+  priority: {
+    type: Number,
+    min: 1,
+    max: 5,
+    default: 3,
+    _scale: 'Ordinal',
+    _measurement: 'Direct',
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    _scale: 'Ratio',
+  },
+
+}, { timestamps: true });
+
+
+// ── 4.3 METRIC SCHEMA ─────────────────────────────────────────
+/**
+ * Metrics that answer questions in GQM hierarchy.
+ * Each metric has a data source and calculation method.
+ */
+const MetricSchema = new mongoose.Schema({
+  questionId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Question',
+    required: true,
+  },
+
+  name: {
+    type: String,
+    required: true,
+    maxlength: 100,
+    _scale: 'Nominal',
+  },
+
+  description: {
+    type: String,
+    maxlength: 300,
+    _scale: 'Nominal',
+  },
+
+  // Entity classification (GBM)
+  entityType: {
+    type: String,
+    enum: ['process', 'product', 'resource'],
+    required: true,
+    _scale: 'Nominal',
+    _measurement: 'Direct',
+    _note: 'GBM entity category',
+  },
+
+  // Attribute classification (GBM)
+  attributeType: {
+    type: String,
+    enum: ['internal', 'external'],
+    required: true,
+    _scale: 'Nominal',
+    _measurement: 'Direct',
+    _note: 'Internal: entity properties; External: environment/behavior',
+  },
+
+  // Measurement scale
+  scale: {
+    type: String,
+    enum: ['nominal', 'ordinal', 'interval', 'ratio', 'absolute'],
+    required: true,
+    _scale: 'Nominal',
+    _measurement: 'Direct',
+  },
+
+  // Data source and calculation
+  dataSource: {
+    type: String,
+    enum: ['vibe_checkins', 'support_posts', 'journals', 'logins', 'computed'],
+    required: true,
+    _scale: 'Nominal',
+  },
+
+  calculation: {
+    type: String,
+    required: true,
+    _scale: 'Nominal',
+    _measurement: 'Direct',
+    _note: 'How to compute the metric (e.g., "AVG(moodValue)", "COUNT(category=Anxiety)")',
+  },
+
+  unit: {
+    type: String,
+    maxlength: 50,
+    _scale: 'Nominal',
+    _note: 'Unit of measurement (e.g., "score", "count", "percentage")',
+  },
+
+  targetValue: {
+    type: Number,
+    _scale: 'Ratio',
+    _note: 'Target value for goal achievement',
+  },
+
+  targetDirection: {
+    type: String,
+    enum: ['increase', 'decrease', 'maintain'],
+    _scale: 'Nominal',
+  },
+
+  isActive: {
+    type: Boolean,
+    default: true,
+    _scale: 'Nominal (binary)',
+  },
+
+  createdAt: {
+    type: Date,
+    default: Date.now,
+    _scale: 'Ratio',
+  },
+
+}, { timestamps: true });
+
+
+// ── 4.4 MEASUREMENT RESULT SCHEMA ─────────────────────────────
+/**
+ * Stores computed metric values over time for tracking progress.
+ */
+const MeasurementResultSchema = new mongoose.Schema({
+  metricId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Metric',
+    required: true,
+  },
+
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+
+  value: {
+    type: Number,
+    required: true,
+    _scale: 'Ratio',
+    _measurement: 'Direct or Indirect',
+  },
+
+  period: {
+    type: String,
+    enum: ['daily', 'weekly', 'monthly'],
+    required: true,
+    _scale: 'Nominal',
+  },
+
+  periodStart: {
+    type: Date,
+    required: true,
+    _scale: 'Ratio',
+  },
+
+  periodEnd: {
+    type: Date,
+    required: true,
+    _scale: 'Ratio',
+  },
+
+  computedAt: {
+    type: Date,
+    default: Date.now,
+    _scale: 'Ratio',
+  },
+
+}, { timestamps: true });
 
 
 // ── EXPORTS ───────────────────────────────────────────────────
