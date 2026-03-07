@@ -24,6 +24,7 @@ const ENGAGEMENT_TIERS = [                 // ORDINAL scale (derived, indirect)
   { label: "High",      min: 51, max: 75,  color: "#a8d8a8" },
   { label: "Excellent", min: 76, max: 100, color: "#5ec4b1" },
 ];
+
 // ═══════════════════════════════════════════════════════
 //  GOAL-BASED MEASUREMENT (GBM) CONSTANTS
 //  Implementing GQM paradigm for personalized goals
@@ -93,6 +94,56 @@ const INITIAL_STATE = {
     { id:1, category:"Anxiety",    preview:"Feeling overwhelmed with finals...", flagged:false },
     { id:2, category:"Study Tips", preview:"Pomodoro technique changed my life!", flagged:false },
     { id:3, category:"Burnout",    preview:"Can't stop doom-scrolling at 2am",    flagged:false },
+  ],
+  // GBM Data
+  goals: [
+    {
+      id: 1,
+      title: "Improve Overall Mood",
+      object: "my daily mood scores",
+      purpose: "improve",
+      perspective: "myself",
+      environment: "during semester",
+      type: "active",
+      description: "Track and improve my daily mood patterns",
+      isActive: true,
+      createdAt: new Date(),
+      questions: [
+        {
+          id: 1,
+          question: "What is my average mood score this week?",
+          category: "quality",
+          priority: 5,
+        }
+      ],
+      metrics: [
+        {
+          id: 1,
+          name: "Average Mood Score",
+          description: "Weekly average of daily mood check-ins",
+          entityType: "process",
+          attributeType: "external",
+          scale: "ordinal",
+          dataSource: "vibe_checkins",
+          calculation: "AVG(moodValue)",
+          unit: "score",
+          targetValue: 4.0,
+          targetDirection: "increase",
+          isActive: true,
+        }
+      ]
+    }
+  ],
+  measurementResults: [
+    {
+      id: 1,
+      metricId: 1,
+      value: 3.8,
+      period: "weekly",
+      periodStart: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      periodEnd: new Date(),
+      computedAt: new Date(),
+    }
   ],
 };
 
@@ -390,7 +441,7 @@ export default function App() {
           Student Mental Health · Measurement Theory App
         </div>
         <nav style={styles.nav}>
-          {["dashboard", "vibe", "forum", "scores"].map(t => (
+          {["dashboard", "vibe", "forum", "goals", "scores"].map(t => (
             <button key={t} style={styles.navBtn(tab === t)} onClick={() => setTab(t)}>
               {t.charAt(0).toUpperCase() + t.slice(1)}
             </button>
@@ -683,6 +734,91 @@ export default function App() {
                       {post.flagged && <span style={styles.pill("#ff6b8a")}>🚩 Flagged</span>}
                     </div>
                     <div style={{ fontSize:13, color:"#c8cad8" }}>{post.preview}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ── GOAL-BASED MEASUREMENT (GBM) ─────────────── */}
+        {tab === "goals" && (
+          <>
+            <div style={styles.card}>
+              <div style={styles.cardTitle}>
+                Goal-Based Measurement
+                <span style={styles.scaleTag("#7b8cff")}>GQM Paradigm</span>
+              </div>
+              <p style={{ color:"#8890a8", fontSize:13, marginTop:0 }}>
+                Set personalized goals using the <strong style={{ color:"#e8eaf0" }}>Goal-Question-Metric</strong> approach.
+                Define what you want to measure, ask specific questions, and track quantifiable metrics.
+              </p>
+
+              <div style={{ marginBottom: 24 }}>
+                <button style={styles.btn("#7b8cff")} onClick={() => showToast("Goal creation feature coming soon!", true)}>
+                  + Create New Goal
+                </button>
+              </div>
+
+              <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
+                {state.goals.map(goal => (
+                  <div key={goal.id} style={{
+                    background:"#1e2235", borderRadius:12, padding:"16px",
+                    borderLeft:`3px solid ${goal.type === 'active' ? '#7b8cff' : '#5ec4b1'}`,
+                  }}>
+                    <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+                      <h3 style={{ margin:0, fontSize:16, fontWeight:700 }}>{goal.title}</h3>
+                      <span style={styles.pill(goal.type === 'active' ? '#7b8cff' : '#5ec4b1')}>
+                        {goal.type === 'active' ? 'Active' : 'Passive'}
+                      </span>
+                      <span style={styles.scaleTag("#7b8cff")}>GQ(I)M Goal</span>
+                    </div>
+
+                    <div style={{ fontSize:13, color:"#c8cad8", marginBottom:12 }}>
+                      <strong>Object:</strong> {goal.object} •
+                      <strong> Purpose:</strong> {GQIM_PURPOSES.find(p => p.value === goal.purpose)?.label} •
+                      <strong> Perspective:</strong> {GQIM_PERSPECTIVES.find(p => p.value === goal.perspective)?.label}
+                    </div>
+
+                    <div style={{ marginBottom:12 }}>
+                      <div style={{ fontSize:13, fontWeight:600, color:"#e8eaf0", marginBottom:4 }}>
+                        Questions ({goal.questions.length}):
+                      </div>
+                      {goal.questions.map(q => (
+                        <div key={q.id} style={{
+                          background:"#12162b", padding:"8px 12px", borderRadius:8, marginBottom:4,
+                          fontSize:12, color:"#8890a8"
+                        }}>
+                          {q.question} <span style={styles.pill("#ffd166")}>{q.category}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div>
+                      <div style={{ fontSize:13, fontWeight:600, color:"#e8eaf0", marginBottom:4 }}>
+                        Metrics ({goal.metrics.length}):
+                      </div>
+                      {goal.metrics.map(m => (
+                        <div key={m.id} style={{
+                          background:"#12162b", padding:"8px 12px", borderRadius:8, marginBottom:4,
+                          fontSize:12, color:"#8890a8", display:"flex", justifyContent:"space-between"
+                        }}>
+                          <span>{m.name}: {m.calculation}</span>
+                          <span style={styles.pill("#a8d8a8")}>{m.scale}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Measurement Results */}
+                    {state.measurementResults.filter(r => goal.metrics.some(m => m.id === r.metricId)).map(result => (
+                      <div key={result.id} style={{
+                        marginTop:8, padding:"8px 12px", background:"#0d0f1a", borderRadius:6,
+                        fontSize:12, color:"#5a5f7a"
+                      }}>
+                        Latest: {result.value} {goal.metrics.find(m => m.id === result.metricId)?.unit}
+                        (Target: {goal.metrics.find(m => m.id === result.metricId)?.targetValue} ↑)
+                      </div>
+                    ))}
                   </div>
                 ))}
               </div>
