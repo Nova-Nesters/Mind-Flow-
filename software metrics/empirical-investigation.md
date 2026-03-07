@@ -1,10 +1,10 @@
-# MindFlow App -- Empirical Investigation Implementation
+# MindFlow App: Empirical Investigation Implementation
 
 ## Overview
 
-The code demonstrates the empirical investigation process by: -
-Collecting measurable user data - Applying measurement scales -
-Validating collected data - Analyzing the data through derived metrics -
+The code demonstrates the empirical investigation process by:
+Collecting measurable user data, Applying measurement scales,
+Validating collected data Analyzing the data through derived metrics
 Presenting results visually
 
 ------------------------------------------------------------------------
@@ -183,7 +183,7 @@ engagement.
 The Health Score is an **indirect measurement** because it combines
 several direct measurements.
 
-Inputs: - Streak days - Mood check‑ins - Login frequency - Journal
+Inputs:  Streak days;  Mood check‑ins;  Login frequency;  Journal
 activity
 
 Output: A normalized score between 0 and 100.
@@ -201,9 +201,9 @@ Users are then classified into engagement tiers:
 
 The application presents empirical results using visual components:
 
-MoodSparkline -- shows mood trends over time\
-CircularScore -- visualizes the overall engagement score\
-Progress bars -- display activity levels such as resource usage
+MoodSparkline; shows mood trends over time\
+CircularScore; visualizes the overall engagement score\
+Progress bars; display activity levels such as resource usage
 
 These visualizations help interpret collected empirical data.
 
