@@ -430,6 +430,182 @@ function runTests() {
 if (require.main === module) {
   runTests();
 }
+// ────────────────────────────────────────────────────────────
+// 7. GOAL-BASED MEASUREMENT (GBM) VALIDATORS
+// ────────────────────────────────────────────────────────────
+
+// ── GBM CONSTANTS ────────────────────────────────────────────
+const GBM_ENTITY_TYPES = new Set(['process', 'product', 'resource']);
+const GBM_ATTRIBUTE_TYPES = new Set(['internal', 'external']);
+const MEASUREMENT_SCALES = new Set(['nominal', 'ordinal', 'interval', 'ratio', 'absolute']);
+const GQM_CATEGORIES = new Set(['people', 'process', 'product', 'resource', 'quality']);
+const DATA_SOURCES = new Set(['vibe_checkins', 'support_posts', 'journals', 'logins', 'computed']);
+
+// ── VALIDATE GOAL ────────────────────────────────────────────
+function validateGoal(goal) {
+  const errors = [];
+
+  // Required GQ(I)M components
+  if (!goal.object || typeof goal.object !== 'string') {
+    errors.push('Goal must have a valid object (what to measure)');
+  }
+
+  if (!['understand', 'predict', 'control', 'improve', 'reduce'].includes(goal.purpose)) {
+    errors.push('Goal must have a valid purpose (understand/predict/control/improve/reduce)');
+  }
+
+  if (!['myself', 'therapist', 'family', 'school'].includes(goal.perspective)) {
+    errors.push('Goal must have a valid perspective (myself/therapist/family/school)');
+  }
+
+  if (!goal.environment || typeof goal.environment !== 'string') {
+    errors.push('Goal must have a valid environment (context/constraints)');
+  }
+
+  if (!['active', 'passive'].includes(goal.type)) {
+    errors.push('Goal must specify type (active/passive)');
+  }
+
+  if (!goal.title || goal.title.length > 200) {
+    errors.push('Goal must have a title (max 200 characters)');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
+// ── VALIDATE QUESTION ────────────────────────────────────────
+function validateQuestion(question) {
+  const errors = [];
+
+  if (!question.question || question.question.length > 500) {
+    errors.push('Question must be provided (max 500 characters)');
+  }
+
+  if (!GQM_CATEGORIES.has(question.category)) {
+    errors.push('Question must have a valid GQM category (people/process/product/resource/quality)');
+  }
+
+  if (question.priority < 1 || question.priority > 5) {
+    errors.push('Question priority must be between 1-5');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
+// ── VALIDATE METRIC ──────────────────────────────────────────
+function validateMetric(metric) {
+  const errors = [];
+
+  if (!metric.name || metric.name.length > 100) {
+    errors.push('Metric must have a name (max 100 characters)');
+  }
+
+  if (!GBM_ENTITY_TYPES.has(metric.entityType)) {
+    errors.push('Metric must have a valid entity type (process/product/resource)');
+  }
+
+  if (!GBM_ATTRIBUTE_TYPES.has(metric.attributeType)) {
+    errors.push('Metric must have a valid attribute type (internal/external)');
+  }
+
+  if (!MEASUREMENT_SCALES.has(metric.scale)) {
+    errors.push('Metric must have a valid measurement scale (nominal/ordinal/interval/ratio/absolute)');
+  }
+
+  if (!DATA_SOURCES.has(metric.dataSource)) {
+    errors.push('Metric must have a valid data source');
+  }
+
+  if (!metric.calculation) {
+    errors.push('Metric must have a calculation method');
+  }
+
+  // Validate target direction consistency
+  if (metric.targetValue !== undefined && !metric.targetDirection) {
+    errors.push('Metric with target value must specify target direction (increase/decrease/maintain)');
+  }
+
+  if (metric.targetDirection && !['increase', 'decrease', 'maintain'].includes(metric.targetDirection)) {
+    errors.push('Target direction must be increase/decrease/maintain');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
+// ── VALIDATE GQM HIERARCHY ───────────────────────────────────
+function validateGQMHierarchy(goal, questions, metrics) {
+  const errors = [];
+
+  // Goal validation
+  const goalValidation = validateGoal(goal);
+  if (!goalValidation.valid) {
+    errors.push(...goalValidation.errors.map(e => `Goal: ${e}`));
+  }
+
+  // Questions validation and relationship
+  if (!questions || questions.length === 0) {
+    errors.push('Goal must have at least one question');
+  } else {
+    questions.forEach((q, i) => {
+      const qValidation = validateQuestion(q);
+      if (!qValidation.valid) {
+        errors.push(...qValidation.errors.map(e => `Question ${i+1}: ${e}`));
+      }
+    });
+  }
+
+  // Metrics validation and relationship
+  if (!metrics || metrics.length === 0) {
+    errors.push('Goal must have at least one metric');
+  } else {
+    metrics.forEach((m, i) => {
+      const mValidation = validateMetric(m);
+      if (!mValidation.valid) {
+        errors.push(...mValidation.errors.map(e => `Metric ${i+1}: ${e}`));
+      }
+    });
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
+
+// ── VALIDATE MEASUREMENT RESULT ──────────────────────────────
+function validateMeasurementResult(result) {
+  const errors = [];
+
+  if (typeof result.value !== 'number' || isNaN(result.value)) {
+    errors.push('Measurement result must have a valid numeric value');
+  }
+
+  if (!['daily', 'weekly', 'monthly'].includes(result.period)) {
+    errors.push('Measurement period must be daily/weekly/monthly');
+  }
+
+  if (!result.periodStart || !result.periodEnd) {
+    errors.push('Measurement result must have period start and end dates');
+  }
+
+  if (result.periodStart >= result.periodEnd) {
+    errors.push('Period start must be before period end');
+  }
+
+  return {
+    valid: errors.length === 0,
+    errors
+  };
+}
 
 module.exports = {
   validateVibeCheckIn,
