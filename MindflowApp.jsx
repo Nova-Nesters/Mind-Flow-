@@ -24,6 +24,36 @@ const ENGAGEMENT_TIERS = [                 // ORDINAL scale (derived, indirect)
   { label: "High",      min: 51, max: 75,  color: "#a8d8a8" },
   { label: "Excellent", min: 76, max: 100, color: "#5ec4b1" },
 ];
+// ═══════════════════════════════════════════════════════
+//  GOAL-BASED MEASUREMENT (GBM) CONSTANTS
+//  Implementing GQM paradigm for personalized goals
+// ═══════════════════════════════════════════════════════
+
+const GBM_ENTITY_TYPES = ['process', 'product', 'resource'];
+const GBM_ATTRIBUTE_TYPES = ['internal', 'external'];
+const MEASUREMENT_SCALES = ['nominal', 'ordinal', 'interval', 'ratio', 'absolute'];
+const GQM_CATEGORIES = ['people', 'process', 'product', 'resource', 'quality'];
+const DATA_SOURCES = ['vibe_checkins', 'support_posts', 'journals', 'logins', 'computed'];
+
+const GQIM_PURPOSES = [
+  { value: 'understand', label: 'Understand', desc: 'Learn about current state' },
+  { value: 'predict', label: 'Predict', desc: 'Forecast future behavior' },
+  { value: 'control', label: 'Control', desc: 'Manage and regulate processes' },
+  { value: 'improve', label: 'Improve', desc: 'Enhance performance' },
+  { value: 'reduce', label: 'Reduce', desc: 'Decrease negative aspects' },
+];
+
+const GQIM_PERSPECTIVES = [
+  { value: 'myself', label: 'Myself', desc: 'Personal improvement' },
+  { value: 'therapist', label: 'Therapist', desc: 'Professional guidance' },
+  { value: 'family', label: 'Family', desc: 'Family support' },
+  { value: 'school', label: 'School', desc: 'Academic context' },
+];
+
+const GQIM_TYPES = [
+  { value: 'active', label: 'Active', desc: 'Control/change processes' },
+  { value: 'passive', label: 'Passive', desc: 'Learn/understand' },
+];
 
 // ── VALIDATION: Formal ↔ Empirical consistency ────────────
 function validateCheckIn({ moodValue, moodLabel }) {
