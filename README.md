@@ -55,30 +55,6 @@ Scores map to engagement tiers (Ordinal):
 | High      | 51 – 75  |
 | Excellent | 76 – 100 |
 
-### 🎯 Goal-Based Measurement (`/goals`)
-Set personalized mental health goals using the **Goal-Question-Metric (GQM)** paradigm:
-
-- **Goals**: Formalized using GQ(I)M structure with Object, Purpose, Perspective, Environment
-- **Questions**: Derived from goals to determine achievement (e.g., "What is my average mood this week?")
-- **Metrics**: Quantifiable measures with entity/attribute classification and measurement scales
-
-Example Goal Structure:
-```
-Goal: Improve Overall Mood
-├── Object: my daily mood scores
-├── Purpose: improve
-├── Perspective: myself
-├── Environment: during semester
-├── Type: active
-├── Questions:
-│   └── "What is my average mood score this week?" (Quality category)
-└── Metrics:
-    └── Average Mood Score (Ordinal scale, Process entity, External attribute)
-        ├── Data Source: vibe_checkins
-        ├── Calculation: AVG(moodValue)
-        └── Target: 4.0 (increase)
-```
-
 ---
 
 ## 🗂️ Measurement Theory Reference
@@ -133,19 +109,11 @@ src/
 │   ├── VIBE_SCALE            # Ordinal mood scale definition
 │   ├── SUPPORT_CATEGORIES    # Nominal category list
 │   ├── ENGAGEMENT_TIERS      # Ordinal tier thresholds
-│   ├── GBM CONSTANTS         # GQM paradigm definitions
 │   ├── validateCheckIn()     # Homomorphism validator
 │   └── computeHealthScore()  # Indirect measurement formula
 ├── components/
 │   ├── MoodSparkline         # 7-day SVG mood chart
 │   └── CircularScore         # Animated circular progress ring
-backend/
-├── backend_schema.js         # Mongoose schemas with scale annotations
-│   ├── Goal Schema           # GQ(I)M formalized goals
-│   ├── Question Schema       # GQM questions
-│   ├── Metric Schema         # Quantifiable measures
-│   └── MeasurementResult     # Time-series metric values
-└── measurementValidation.js  # GBM validation functions
 ```
 
 ---
