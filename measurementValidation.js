@@ -339,6 +339,7 @@ function validateFullSnapshot(snapshot) {
   results.streak      = validateStreak(snapshot.streak || {});
   results.category    = validateSupportCategory(snapshot.category || '');
   results.healthScore = validateHealthScore(snapshot.healthScore || {});
+  results.complexity  = validateComplexity(snapshot.complexity || {});
 
   const allValid = Object.values(results).every(r => r.valid);
   return { allValid, results };
@@ -607,6 +608,39 @@ function validateMeasurementResult(result) {
   };
 }
 
+/**
+ * Validates complexity metrics against defined thresholds.
+ *
+ * Rules:
+ *  (a) Cyclomatic Complexity must be ≥ 0 and ≤ 10
+ *  (b) Halstead Effort must be ≥ 0 and ≤ 20,000
+ *  (c) Reuse Count must be a non-negative integer
+ *
+ * @param {{ cyclomaticComplexity: number, halsteadEffort: number, reuseCount: number }}
+ * @returns {{ valid: boolean, errors: string[] }}
+ */
+function validateComplexity({ cyclomaticComplexity, halsteadEffort, reuseCount }) {
+  const errors = [];
+
+  if (typeof cyclomaticComplexity !== 'number' || cyclomaticComplexity < 0) {
+    errors.push(`[Complexity violation] Cyclomatic complexity must be ≥ 0. Got: ${cyclomaticComplexity}`);
+  } else if (cyclomaticComplexity > 10) {
+    errors.push(`[Complexity violation] Cyclomatic complexity ${cyclomaticComplexity} exceeds threshold of 10.`);
+  }
+
+  if (typeof halsteadEffort !== 'number' || halsteadEffort < 0) {
+    errors.push(`[Complexity violation] Halstead effort must be ≥ 0. Got: ${halsteadEffort}`);
+  } else if (halsteadEffort > 20000) {
+    errors.push(`[Complexity violation] Halstead effort ${halsteadEffort} exceeds recommended limit of 20,000.`);
+  }
+
+  if (!Number.isInteger(reuseCount) || reuseCount < 0) {
+    errors.push(`[Complexity violation] Reuse count must be a non-negative integer. Got: ${reuseCount}`);
+  }
+
+  return { valid: errors.length === 0, errors };
+}
+
 module.exports = {
   validateVibeCheckIn,
   validateVibeTimestamps,
@@ -615,6 +649,7 @@ module.exports = {
   validateHealthScore,
   validateFullSnapshot,
   computeHealthScore,
+  validateComplexity,
   VIBE_ORDER,
   VIBE_BY_LABEL,
   VIBE_BY_VALUE,

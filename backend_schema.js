@@ -639,6 +639,71 @@ const MeasurementResultSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 
+// ── 4.5 COMPLEXITY METRICS ─────────────────────────────────────
+/**
+ * Complexity metrics schema for developer-facing maintainability tracking.
+ * SCALE TYPES:
+ *   - Cyclomatic Complexity → Ratio
+ *   - Halstead Volume/Difficulty/Effort → Ratio
+ *   - Reuse Count → Absolute
+ */
+const ComplexitySchema = new mongoose.Schema({
+  moduleName: {
+    type: String,
+    required: true,
+    _scale: 'Nominal',
+    _measurement: 'Direct',
+    _note: 'Name of the module or function analyzed',
+  },
+
+  cyclomaticComplexity: {
+    type: Number,
+    min: 0,
+    _scale: 'Ratio',
+    _measurement: 'Direct',
+    _note: 'Independent paths through the code',
+  },
+
+  halsteadVolume: {
+    type: Number,
+    min: 0,
+    _scale: 'Ratio',
+    _measurement: 'Direct',
+    _note: 'Program size in terms of operators/operands',
+  },
+
+  halsteadDifficulty: {
+    type: Number,
+    min: 0,
+    _scale: 'Ratio',
+    _measurement: 'Direct',
+    _note: 'Relative difficulty of understanding the code',
+  },
+
+  halsteadEffort: {
+    type: Number,
+    min: 0,
+    _scale: 'Ratio',
+    _measurement: 'Indirect',
+    _note: 'Estimated effort to implement/understand',
+  },
+
+  reuseCount: {
+    type: Number,
+    min: 0,
+    _scale: 'Absolute',
+    _measurement: 'Direct',
+    _note: 'Number of reused functions/libraries',
+  },
+
+  analyzedAt: {
+    type: Date,
+    default: Date.now,
+    _scale: 'Ratio',
+  },
+});
+
+
 // ── EXPORTS ───────────────────────────────────────────────────
 module.exports = {
   User:         mongoose.model('User',         UserSchema),
@@ -647,6 +712,7 @@ module.exports = {
   Streak:       mongoose.model('Streak',       StreakSchema),
   Resource:     mongoose.model('Resource',     ResourceSchema),
   HealthScore:  mongoose.model('HealthScore',  HealthScoreSchema),
+  Complexity:   mongoose.model('Complexity',   ComplexitySchema),
   // Constants
   VIBE_SCALE,
   SUPPORT_CATEGORIES,

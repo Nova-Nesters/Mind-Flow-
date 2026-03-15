@@ -57,6 +57,18 @@ Scores map to engagement tiers (Ordinal):
 
 ---
 
+### 🧮 Complexity Metrics (Developer-facing)
+
+The backend includes a developer-facing complexity tracking schema + validation logic:
+
+- **Cyclomatic Complexity** (Ratio) — must be between 0 and 10
+- **Halstead Effort** (Ratio) — must be between 0 and 20,000
+- **Reuse Count** (Absolute) — must be a non-negative integer
+
+These metrics are stored via `backend_schema.js` and validated by `measurementValidation.js` to keep code maintainability measurements consistent.
+
+---
+
 ## 🗂️ Measurement Theory Reference
 
 | Scale    | Where Used                          | Valid Operations                          |
