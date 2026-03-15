@@ -118,6 +118,57 @@ src/
 
 ---
 
+## 📏 Software Size Metrics (`software-size.js`)
+
+The project includes `software-size.js` at the workspace root to compute length-based size metrics for JavaScript and JSX source files.
+
+### What It Measures
+
+- `LOC` (Lines of Code): all lines in each file.
+- `NCLOC` (Non-Comment Lines of Code): non-empty lines that are not comments.
+- `CLOC` (Comment Lines of Code): lines that begin with `//`, `/*`, or `*`.
+- `Comment Density`: `(Total CLOC / Total LOC) * 100`.
+
+### How It Finds Source Files
+
+The script auto-detects your source directory in this order:
+
+1. `my-app/src`
+2. `src`
+
+This supports the current workspace layout where the React app lives in `my-app/`.
+
+### Run Command
+
+From `my-app/`, run:
+
+```bash
+npm run software-size
+```
+
+If PowerShell blocks `npm` via execution policy, use:
+
+```powershell
+& "C:\Program Files\nodejs\npm.cmd" run software-size
+```
+
+### Latest Results
+
+Measured output from the current codebase:
+
+```text
+src/App.jsx: LOC=527, NCLOC=472, CLOC=11
+src/main.jsx: LOC=11, NCLOC=9, CLOC=0
+
+=== Project Metrics Summary ===
+Total LOC: 538
+Total NCLOC: 481
+Total CLOC: 11
+Comment Density: 2.04%
+```
+
+---
+
 ## 🧪 Validation Logic
 
 The `validateCheckIn` function enforces formal measurement consistency:
